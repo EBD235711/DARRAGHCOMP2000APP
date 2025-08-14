@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Library App</string>
+    <string name="username_hint">Username</string>
+    <string name="password_hint">Password</string>
+    <string name="staff">Staff</string>
+    <string name="member">Member</string>
+    <string name="login">Login</string>
+    <string name="add_member">Add New Member</string>
+    <string name="edit_delete_members">Edit/Delete Members</string>
+    <string name="manage_books">Manage Books</string>
+    <string name="view_requests">View Requests</string>
+    <string name="logout">Logout</string>
+    <string name="submit">Submit</string>
+    <string name="cancel">Cancel</string>
+    <string name="first_name_hint">First Name</string>
+    <string name="last_name_hint">Last Name</string>
+    <string name="email_hint">Email</string>
+    <string name="contact_hint">Contact</string>
+    <string name="membership_end_date_hint">Membership End Date (YYYY-MM-DD)</string>
+    <string name="search_hint">Search</string>
+    <string name="title_hint">Title</string>
+    <string name="author_hint">Author</string>
+    <string name="isbn_hint">ISBN</string>
+    <string name="approve">Approve</string>
+    <string name="deny">Deny</string>
+    <string name="request_book">Request Book</string>
+    <string name="email_notifications">Email Notifications</string>
+    <string name="sms_notifications">SMS Notifications</string>
+    <string name="push_notifications">Push Notifications</string>
+    <string name="save">Save</string>
+</resources>

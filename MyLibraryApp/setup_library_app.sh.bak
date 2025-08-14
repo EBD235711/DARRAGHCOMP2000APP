@@ -1,0 +1,149 @@
+cat > app/src/main/java/com/example/libraryapp/MemberDashboardActivity.java << 'EOF'
+package com.example.libraryapp;
+
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.SearchView;
+import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.example.libraryapp.db.AppDatabase;
+import com.example.libraryapp.db.Book;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MemberDashboardActivity extends AppCompatActivity {
+    private RecyclerView recyclerView;
+    private BookAdapter adapter;
+    private SearchView searchView;
+    private String username;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_member_dashboard);
+
+        username = getIntent().getStringExtra("username");
+        recyclerView = findViewById(R.id.book_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new BookAdapter(new ArrayList<>());
+        recyclerView.setAdapter(adapter);
+
+        searchView = findViewById(R.id.search_view);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                new SearchBooksTask().execute(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText.isEmpty()) {
+                    new GetAllBooksTask().execute();
+                }
+                return true;
+            }
+        });
+
+        Button profileButton = findViewById(R.id.profile_button);
+        Button logoutButton = findViewById(R.id.logout_button);
+
+        profileButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ProfileManagementActivity.class);
+            intent.putExtra("username", username);
+            startActivity(intent);
+        });
+
+        logoutButton.setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        });
+
+        new GetAllBooksTask().execute();
+    }
+
+    private class GetAllBooksTask extends AsyncTask<Void, Void, List<Book>> {
+        @Override
+        protected List<Book> doInBackground(Void... voids) {
+            return AppDatabase.getInstance(MemberDashboardActivity.this).bookDao().getAll();
+        }
+
+        @Override
+        protected void onPostExecute(List<Book> books) {
+            adapter.updateBooks(books);
+        }
+    }
+
+    private class SearchBooksTask extends AsyncTask<String, Void, List<Book>> {
+        @Override
+        protected List<Book> doInBackground(String... queries) {
+            return AppDatabase.getInstance(MemberDashboardActivity.this).bookDao().searchBooks("%" + queries[0] + "%");
+        }
+
+        @Override
+        protected void onPostExecute(List<Book> books) {
+            adapter.updateBooks(books);
+        }
+    }
+
+    private class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
+        private List<Book> books;
+
+        public BookAdapter(List<Book> books) {
+            this.books = books;
+        }
+
+        public void updateBooks(List<Book> books) {
+            this.books = books;
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_book_member, parent, false);
+            return new ViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            Book book = books.get(position);
+            holder.titleTextView.setText(book.title);
+            holder.authorTextView.setText(book.author);
+            holder.statusTextView.setText(book.status);
+
+            holder.requestButton.setOnClickListener(v -> {
+                Intent intent = new Intent(MemberDashboardActivity.this, RequestBookActivity.class);
+                intent.putExtra("username", username);
+                intent.putExtra("book_title", book.title);
+                startActivity(intent);
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return books.size();
+        }
+
+        class ViewHolder extends RecyclerView.ViewHolder {
+            TextView titleTextView, authorTextView, statusTextView;
+            Button requestButton;
+
+            ViewHolder(View itemView) {
+                super(itemView);
+                titleTextView = itemView.findViewById(R.id.title);
+                authorTextView = itemView.findViewById(R.id.author);
+                statusTextView = itemView.findViewById(R.id.status);
+                requestButton = itemView.findViewById(R.id.request_button);
+            }
+        }
+    }
+}
+EOF
